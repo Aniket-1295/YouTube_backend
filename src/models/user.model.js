@@ -1,0 +1,110 @@
+import mongoose,{Schema} from "mongoose";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+
+const userSchema = new Schema({
+    
+    username:{
+        type:String,
+        required:true,
+        unique:true,
+        trim:true,
+        minlength:3,
+        maxlength:30,
+        index:true
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true,
+        trim:true,
+        lowercase:true,
+    },
+    fullName:{
+        type:String,
+        required:true,
+        trim:true,
+        index:true,
+        minlength:3,
+        maxlength:50
+    },
+    avatarUrl:{
+        type:String, //cloudinary url 
+        required:true,  
+    },
+    coverImageUrl:{
+        type:String, //cloudinary url
+        required:false,
+    },
+    watchHistory:[
+        {
+        type:Schema.Types.ObjectId,
+        ref:"Video"
+        }
+],
+
+password:{
+    type:String,
+    required:[true,"Password is required"],
+},
+
+refreshTokens:[
+    {
+        type:String,
+    }
+]
+
+}
+
+,{timestamps:true});
+
+//pre save hook to hash password before saving to DB
+//here this refers to the user document
+//next is a callback function to move to the next middleware
+//if password is not modified then move to next middleware
+//if password is modified then hash the password and then move to next middleware
+//async function to hash password 
+//always use function keyword to access this keyword because arrow function does not have its own this context
+
+userSchema.pre("save",async function(next){
+    if(!this.isModified("password")){
+        return next();
+    }
+
+   
+
+    const salt= await bcrypt.genSalt(10);
+    this.password= await bcrypt.hash(this.password,salt);
+    next();
+});
+
+// custom method to compare password
+//here this refers to the user document
+//plainPassword is the password entered by the user
+//this.password is the hashed password stored in the DB
+//return true if passwords match else false
+//async function to compare password
+//always use function keyword to access this keyword because arrow function does not have its own this context
+userSchema.methods.isPasswordMatch = async function(plainPassword){
+    return await bcrypt.compare(plainPassword,this.password);
+};
+
+userSchema.methods.generateAccessToken = function(){
+    return jwt.sign({
+        userId:this._id,
+        username:this.username,
+        email:this.email,
+        fullName:this.fullName
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+    });
+};
+
+userSchema.methods.generateRefreshToken = function(){
+    return jwt.sign({userId:this._id},process.env.REFRESH_TOKEN_SECRET,{expiresIn:process.env.REFRESH_TOKEN_EXPIRY});
+};
+
+export const User =mongoose.model("User",userSchema);
