@@ -15,6 +15,7 @@ const asyncHandler =(reqHandler)=>{
 }
 
 
+
 //This is a higher-order function (a function that returns another function). It takes a single argument fn, which is expected to be an asynchronous function (a function that returns a Promise).
 //Inside the returned function, the fn (the original route handler) is called with req, res, and next as arguments.
 // The await ensures that the asynchronous operation completes before proceeding.

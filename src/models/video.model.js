@@ -24,8 +24,10 @@ const videoSchema = new Schema({
         // trim:true,
         maxlength:500,
     },
+    //duration of the video
     duaration:{
         type:Number, //form cloudinary in seconds
+        required:true,
     },
     viwesCount:{
         type:Number,
@@ -47,6 +49,7 @@ const videoSchema = new Schema({
 
 },{timestamps:true});
 
+//we can add our plugin here
 //plugin for pagination of aggregate queries
 //now we can create aggregate paginated queries using Video.aggregatePaginate()
 videoSchema.plugin(mongooseAggregatePaginate);

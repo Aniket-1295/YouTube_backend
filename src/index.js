@@ -10,6 +10,7 @@ import {app} from "./app.js";
 //we can use as the exprimential feature of ES6 module syntax =>"dev": "nodemon -r dotenv/config  src/index.js"
 dotenv.config({path:"./env"})
 
+
 //this is called separation of concerns here we are separating the app configuration and server configuration
 //rather wrrting DB connection logic here we just import the connectDB function from db/index.js file and call it here
 //so we have seperate the logic of DB connection from server configuration

@@ -1,5 +1,5 @@
 import mongoose,{Schema} from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 
@@ -71,9 +71,6 @@ userSchema.pre("save",async function(next){
     if(!this.isModified("password")){
         return next();
     }
-
-   
-
     const salt= await bcrypt.genSalt(10);
     this.password= await bcrypt.hash(this.password,salt);
     next();
@@ -84,27 +81,44 @@ userSchema.pre("save",async function(next){
 //plainPassword is the password entered by the user
 //this.password is the hashed password stored in the DB
 //return true if passwords match else false
-//async function to compare password
+//async function to compare password (compare method returs a true or false)
 //always use function keyword to access this keyword because arrow function does not have its own this context
 userSchema.methods.isPasswordMatch = async function(plainPassword){
     return await bcrypt.compare(plainPassword,this.password);
 };
 
+//custom method to generate access token.
+//here this refers to the user document
+//return access token
+
 userSchema.methods.generateAccessToken = function(){
-    return jwt.sign({
+    //generate and return access token
+    return jwt.sign(
+        //payload
+    {
         userId:this._id,
         username:this.username,
         email:this.email,
         fullName:this.fullName
     },
+    //secret or private key
     process.env.ACCESS_TOKEN_SECRET,
+
+    //options like expiry
     {
         expiresIn:process.env.ACCESS_TOKEN_EXPIRY
-    });
+    }
+);
 };
 
+//custom method to generate refresh token
 userSchema.methods.generateRefreshToken = function(){
-    return jwt.sign({userId:this._id},process.env.REFRESH_TOKEN_SECRET,{expiresIn:process.env.REFRESH_TOKEN_EXPIRY});
+    return jwt.sign(
+        {userId:this._id},
+        process.env.REFRESH_TOKEN_SECRET,{expiresIn:process.env.REFRESH_TOKEN_EXPIRY});
 };
+
+
+//both are jwt tokens but they differ in useses
 
 export const User =mongoose.model("User",userSchema);
