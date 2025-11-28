@@ -3,7 +3,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 
-
 //now app has the superpowers of express
 const app= express();
 
@@ -24,7 +23,12 @@ app.use(cookieParser()); //to parse cookies from request headers here we access 
 
 
 
+//now we have to import all the routes here
+import userRouter from "./routes/user.routes.js";
 
+//routes declaration as a middleware
+
+app.use("/api/v1/users",userRouter); //http://localhost:8000/api/v1/users
 
 
 
