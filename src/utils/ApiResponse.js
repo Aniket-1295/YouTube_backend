@@ -15,3 +15,5 @@ class ApiResponse {
     //     };
     // }
 }
+
+export {ApiResponse};

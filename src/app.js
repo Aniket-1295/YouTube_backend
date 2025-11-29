@@ -27,7 +27,6 @@ app.use(cookieParser()); //to parse cookies from request headers here we access 
 import userRouter from "./routes/user.routes.js";
 
 //routes declaration as a middleware
-
 app.use("/api/v1/users",userRouter); //http://localhost:8000/api/v1/users
 
 

@@ -49,7 +49,7 @@ password:{
     required:[true,"Password is required"],
 },
 
-refreshTokens:[
+refreshToken:[
     {
         type:String,
     }
