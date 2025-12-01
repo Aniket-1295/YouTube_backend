@@ -29,11 +29,11 @@ const userSchema = new Schema({
         minlength:3,
         maxlength:50
     },
-    avatarUrl:{
+    avatar:{
         type:String, //cloudinary url 
         required:true,  
     },
-    coverImageUrl:{
+    coverImage:{
         type:String, //cloudinary url
         required:false,
     },

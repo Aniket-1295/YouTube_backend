@@ -16,13 +16,13 @@ const uploadOnCloudinary = async (localFilePath)=>{
 
         if(!localFilePath) return new Error("File path is required");
 
-      const response= await cloudinary.uploader.upload(localFilePath,{resource_type:"auto",
-            public_id: "my_dog",
-            overwrite: true,
+      const response= await cloudinary.uploader.upload(localFilePath,{resource_type:"auto"
+           
         })
         
         //file upload to cloudinary successful
-        console.log("File uploaded to cloudinary successfully ", response.url);
+        // console.log("File uploaded to cloudinary successfully ", response.url);
+        fs.unlinkSync(localFilePath);
 
         return response;
 

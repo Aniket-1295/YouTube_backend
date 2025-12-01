@@ -45,13 +45,21 @@ const regesterUser = asyncHandler(async (req, res) => {
 
   //if user already exists throw an error
   if (existedUser) {
-    throw new ApiError(409, "Userwith this email or username already exists");
+    throw new ApiError(409, "User with this email or username already exists");
   }
   
 
   //get the avatar and cover image from request files
  const avatarLocalPath = req.files?.avatar[0]?.path;
- const coverImageLocalPath = req.files?.coverImage[0]?.path;
+//  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+let coverImageLocalPath;
+if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+  coverImageLocalPath = req.files?.coverImage[0]?.path;
+}
+
+//  console.log(avatarLocalPath);
+//  console.log(coverImageLocalPath);
 
  //check if avatar and cover image is uploaded or not
  if (!avatarLocalPath) {
@@ -62,9 +70,14 @@ const regesterUser = asyncHandler(async (req, res) => {
 const avatarResponse = await uploadOnCloudinary(avatarLocalPath);
 const coverImageResponse = await uploadOnCloudinary(coverImageLocalPath);
 
+ 
+
+// console.log(avatarResponse);
+// console.log(coverImageResponse);
+
 //check if avatar and cover image is uploaded or not
 if (!avatarResponse) {
-  throw new ApiError(400, "Avatar or cover image upload to cloudinary failed");
+  throw new ApiError(501, "Avatar or cover image upload to cloudinary failed");
 }
 
 //create user object
@@ -96,7 +109,7 @@ const user = await User.create({
 //   throw new ApiError(500, "something went wrong while creating user");
 // }
 
-//check user created or not
+//check user created or not and remove password and refresh token field from response 
 const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
 if (!createdUser) {
