@@ -602,6 +602,127 @@ const updateUserCoverImage = asyncHandler(async (req,res)=>{
   )
 
 })
+
+
+const getUserChannelProfile = asyncHandler(async (req,res)=>{
+
+
+  //logical steps to get user channel
+
+  //1.get the usename from req.params
+  //2.check if the username is provided or not or it is valid or not
+  //3.if yes then grt the channel information by appplying aggregation pipeline
+  //4.check if the channel is found or not
+  //5.send the response
+
+
+  //1.get the username from req.params
+  const {username} = req.params;
+
+  //2.check if the username is provided or not or it is valid or not
+
+  if(!username?.trim()){
+    throw new ApiError(400,"Please provide username");
+  }
+
+  //3.if yes then grt the channel information by appplying aggregation pipeline
+
+  //how to apply pipeline on user model
+
+  const channelProfile = await User.aggregate([
+    {
+
+      $match: {
+        username:username.toLowerCase()
+      }
+
+
+    },
+
+    //left join using $lookup operator (subscription model)
+    {
+
+      $lookup:{
+        from:"subscriptions",
+        // localField of user model
+        localField:"_id",
+        foreignField:"channel",
+        as:"subscribers"
+      }
+
+    },
+    {
+
+      $lookup:{
+        from:"subscriptions",
+        // localField of user model
+        localField:"_id",
+        foreignField:"subscriber",
+        as:"subscribedTo"
+      }
+
+    },
+    {
+
+      $addFields:{
+        subscribersCount:{$size:"$subscribers"},
+        subscribedCount:{$size:"$subscribedTo"},
+        isSubscribed:{
+          $cond: {
+            if: {
+              $in: [req.user.userId, "$subscribers.subscriber"]
+            },
+            then: true,
+            else: false
+          }
+
+        }
+      }
+
+    },
+
+    //projection
+    {
+      $project: {
+        username:1,
+        fullName:1,
+        avatar:1,
+        coverImage:1,
+        subscribersCount:1,
+        subscribedCount:1,
+        isSubscribed:1,
+        email: 1
+       
+      }
+    }
+
+  ])
+
+
+  //4.check if the channel is found or not
+
+  if(!channelProfile?.length){
+    throw new ApiError(404,"Channel not found");
+  }
+
+  //5.send the response
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(
+      200,
+      channelProfile[0],
+      "Channel profile fetched successfully"
+    )
+  )
+
+
+
+
+
+
+})
  
 
 
@@ -614,5 +735,6 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
-  updateUserCoverImage
+  updateUserCoverImage,
+  getUserChannel
 };
